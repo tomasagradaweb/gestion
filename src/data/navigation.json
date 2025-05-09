@@ -1,0 +1,26 @@
+{
+    "user": {
+      "name": "shadcnzz",
+      "email": "m@example.com",
+      "avatar": "/avatars/shadcn.jpg"
+    },
+    "navMain": [
+      {
+        "title": "Dashboard",
+        "url": "/dashboard",
+        "icon": "LayoutDashboardIcon",
+        "isActive": false
+      },
+      {
+        "title": "Clientes",
+        "url": "/clients",
+        "icon": "ListIcon",
+        "isActive": false
+      }
+    ],
+    "navClouds": [],
+    "navSecondary": [],
+    "documents": []
+  }
+  
+  

@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id              String    @id @default(uuid())
+  name            String
+  taxId           String?   @unique // CIF/NIF de la empresa - ahora es único
+  address         String?
+  city            String?
+  postalCode      String?
+  province        String?
+  country         String?
+  email           String?
+  phone           String?
+  website         String?
+  logo            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  status          String    @default("active")
+  
+  // Relaciones
+  users           User[]    // Usuarios asociados a este negocio
+  clients         Client[]  // Clientes de este negocio
+}
+
+model Client {
+  id                String   @id @default(uuid())
+  posicion          Int      @default(0)
+  nombre            String
+  nifContacto       String?  @unique
+  direccion         String?
+  poblacion         String?
+  codigoPostal      String?
+  provincia         String?
+  pais              String?
+  nombreComercial   String?
+  identificacionVAT String?  @unique
+  email             String?
+  telefono          String?
+  movil             String?
+  website           String?
+  fechaNacimiento   DateTime?
+  fechaRegistro     DateTime?
+  fechaAlta         DateTime @default(now())
+  fechaBaja         DateTime?
+  estado            String   @default("activo")
+  tipo              String   @default("cliente")
+  observaciones     String?
+  contacto          String?
+  idioma            String?
+  moneda            String?
+  metadatos         String?
+
+  usuarioId         String?
+  user              User?    @relation(fields: [usuarioId], references: [id])
+  
+  // Relación con Business
+  businessId        String?
+  business          Business? @relation(fields: [businessId], references: [id])
+}
+
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  hashedPassword String?
+  image         String?
+  role          String?   @default("user")
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relación con Business
+  businessId    String?
+  business      Business? @relation(fields: [businessId], references: [id])
+  
+  // Relación con Client
+  clients       Client[]
+  
+  // Relación con TableConfig
+  tableConfigs  TableConfig[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Modelo para guardar la configuración personalizada de la tabla
+model TableConfig {
+  id          String    @id @default(uuid())
+  userId      String
+  tableId     String    // Identificador de la tabla (ej: "clients", "invoices", etc.)
+  config      Json      // Configuración en formato JSON (columnas visibles, orden, etc.)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tableId])
+}
